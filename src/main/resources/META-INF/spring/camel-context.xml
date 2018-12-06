@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:cxf="http://camel.apache.org/schema/cxf"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans      http://www.springframework.org/schema/beans/spring-beans.xsd             http://camel.apache.org/schema/spring   http://camel.apache.org/schema/spring/camel-spring.xsd             http://camel.apache.org/schema/cxf   http://camel.apache.org/schema/cxf/camel-cxf.xsd">
+    <cxf:cxfEndpoint address="http://0.0.0.0:9292/cxf/order"
+        id="demoOrderEndpoint" serviceClass="com.demo.order.DemoOrderService"/>
+    <bean class="com.demo.order.OrderProcessor" id="orderProcessor"/>
+    <camelContext id="_camelContext1" xmlns="http://camel.apache.org/schema/spring">
+        <route id="cxf">
+            <from id="demoOrderEndpointListener" uri="cxf:bean:demoOrderEndpoint"/>
+            <recipientList id="dispatchToCorrectRoute">
+                <simple>direct:${header.operationName}</simple>
+            </recipientList>
+        </route>
+        <route id="Order">
+            <from id="statusIncidentStarter" uri="direct:provideOrder"/>
+            <log id="logStatusIncident" message="OrderDetails Call"/>
+            <process id="_process1" ref="orderProcessor"/>
+        </route>
+    </camelContext>
+</beans>
